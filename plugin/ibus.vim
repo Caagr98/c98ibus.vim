@@ -1,15 +1,20 @@
 function! s:setInputMode(mode)
-python << EOF
+python3 << EOF
 try:
-	import ibus,dbus,vim
-	bus = ibus.Bus()
-	conn = bus.get_dbusconn().get_object(ibus.common.IBUS_SERVICE_IBUS, bus.current_input_contxt())
-	ic = dbus.Interface(conn, dbus_interface=ibus.common.IBUS_IFACE_INPUT_CONTEXT)
+	import dbus, vim
+	import ctypes
+	dll = ctypes.CDLL("libibus-1.0.so")
+	get_addr = dll.ibus_get_address
+	get_addr.restype=ctypes.c_char_p
+
+	dbusconn = dbus.connection.Connection(get_addr())
+	ibus = dbus.Interface(dbusconn.get_object("org.freedesktop.IBus", "/org/freedesktop/IBus"), dbus_interface="org.freedesktop.IBus")
+	ic = dbus.Interface(dbusconn.get_object("org.freedesktop.IBus", ibus.CurrentInputContext()), dbus_interface="org.freedesktop.IBus.InputContext")
 	mode = vim.eval("a:mode")
-	ic.PropertyActivate("InputMode." + mode, ibus.PROP_STATE_CHECKED)
-except Exception, e:
-	print "Failed to connect to iBus"
-	print e
+	ic.PropertyActivate("InputMode." + mode, 1)
+except Exception as e:
+	print("Failed to connect to iBus")
+	print(e)
 EOF
 endfunction
 
