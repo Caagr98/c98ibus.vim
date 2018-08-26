@@ -5,7 +5,7 @@ try:
 	import ctypes
 	dll = ctypes.CDLL("libibus-1.0.so")
 	get_addr = dll.ibus_get_address
-	get_addr.restype=ctypes.c_char_p
+	get_addr.restype = ctypes.c_char_p
 
 	dbusconn = dbus.connection.Connection(get_addr())
 	ibus = dbus.Interface(dbusconn.get_object("org.freedesktop.IBus", "/org/freedesktop/IBus"), dbus_interface="org.freedesktop.IBus")
@@ -18,12 +18,8 @@ except Exception as e:
 EOF
 endfunction
 
-function! s:disableIME()
-	if s:normal() | call s:setInputMode('Direct') | endif
-endfunction
-
-function! s:enableIME()
-	if s:normal() | call s:setInputMode('Hiragana') | endif
+function! s:ime(ena)
+	call s:setInputMode(a:ena == s:normal() ? 'Hiragana' : 'Direct')
 endfunction
 
 function! s:normal()
@@ -32,10 +28,9 @@ endfunction
 
 augroup ibus
 	au!
-	au FocusGained * call s:disableIME()
-	au FocusLost   * call s:enableIME()
-	au InsertLeave * call s:disableIME()
-	au InsertEnter * call s:enableIME()
-	au VimEnter    * call s:disableIME()
-	au VimLeave    * call s:enableIME()
+	au FocusGained  * call s:ime(0) | au FocusLost    * call s:ime(1)
+	au InsertLeave  * call s:ime(0) | au InsertEnter  * call s:ime(1)
+	au VimEnter     * call s:ime(0) | au VimLeave     * call s:ime(1)
+	au CmdlineEnter * call s:ime(0) | au CmdlineLeave * call s:ime(1)
+	au CmdwinEnter  * call s:ime(0) | au CmdwinLeave  * call s:ime(1)
 augroup END
