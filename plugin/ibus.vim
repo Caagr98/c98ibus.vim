@@ -31,6 +31,4 @@ augroup ibus
 	au FocusGained  * call s:ime(0) | au FocusLost    * call s:ime(1)
 	au InsertLeave  * call s:ime(0) | au InsertEnter  * call s:ime(1)
 	au VimEnter     * call s:ime(0) | au VimLeave     * call s:ime(1)
-	au CmdlineEnter * call s:ime(0) | au CmdlineLeave * call s:ime(1)
-	au CmdwinEnter  * call s:ime(0) | au CmdwinLeave  * call s:ime(1)
 augroup END
